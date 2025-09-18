@@ -1,26 +1,30 @@
-name: MAUI Build Check
+name: MAUI Checks (Windows TFM)
 
 on:
   push:
-    branches: [ "main" ]
+    branches: [ main ]
   pull_request:
-    branches: [ "main" ]
+    branches: [ main ]
 
 jobs:
-  build:
+  build-windows:
     runs-on: windows-latest
-
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: Setup .NET
-        uses: actions/setup-dotnet@v4
+      - uses: actions/setup-dotnet@v4
         with:
           dotnet-version: 8.0.x
 
-      - name: Restore dependencies
-        run: dotnet restore Grocery.App/Grocery.App.csproj --runtime win-x64
+      # optional: pin sdk to 8.0
+      - name: Create global.json
+        run: echo {\"sdk\":{\"version\":\"8.0.404\",\"rollForward\":\"disable\"}} > global.json
 
-      - name: Build project
-        run: dotnet build Grocery.App/Grocery.App.csproj --configuration Release --no-restore --runtime win-x64
+      - name: Restore (Windows TFM only)
+        run: dotnet restore Grocery.App/Grocery.App.csproj -f net8.0-windows10.0.19041.0 -r win-x64
+
+      - name: Build (Windows TFM only)
+        run: dotnet build Grocery.App/Grocery.App.csproj -c Release -f net8.0-windows10.0.19041.0 -r win-x64 -p:PublishReadyToRun=false --no-restore
+
+      - name: Run tests (if you have a test project)
+        run: dotnet test -c Release --no-build
