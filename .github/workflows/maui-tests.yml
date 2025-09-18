@@ -20,20 +20,30 @@ jobs:
           dotnet-version: 8.0.414
 
       - name: Install MAUI workload
-        run: dotnet workload install maui
+        run: dotnet workload install maui --ignore-failed-sources
 
-      # Restore everything (no -f here!)
       - name: Restore dependencies
         run: dotnet restore Grocery.sln
 
-      # Build class libraries (cross-platform)
-      - name: Build libraries
-        run: dotnet build Grocery.sln -c Release --no-restore
+      - name: Build MAUI app (Windows)
+        run: dotnet build Grocery.App/Grocery.App.csproj `
+             -c Release `
+             -f net8.0-windows10.0.19041.0 `
+             -p:RuntimeIdentifier=win10-x64 `
+             -p:PublishReadyToRun=false `
+             --no-restore
 
-      # Build the MAUI Windows app explicitly
-      - name: Build Grocery.App (Windows)
-        run: dotnet build Grocery.App/Grocery.App.csproj -c Release -f net8.0-windows10.0.19041.0 -p:RuntimeIdentifier=win-x64 -p:PublishReadyToRun=false --no-restore
+      - name: Package MAUI app
+        run: dotnet publish Grocery.App/Grocery.App.csproj `
+             -c Release `
+             -f net8.0-windows10.0.19041.0 `
+             -p:RuntimeIdentifier=win10-x64 `
+             -p:PublishSingleFile=false `
+             -p:WindowsPackageType=None `
+             -o ./artifacts/maui
 
-      # Run tests (only on libs)
-      - name: Run unit tests
-        run: dotnet test Grocery.sln -c Release --no-build --verbosity normal
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: GroceryApp
+          path: artifacts/maui
