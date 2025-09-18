@@ -20,7 +20,7 @@ jobs:
           dotnet-version: 8.0.x
 
       - name: Restore dependencies
-        run: dotnet restore
+        run: dotnet restore Grocery.App/Grocery.App.csproj --runtime win-x64
 
-      - name: Build solution
-        run: dotnet build --configuration Release --no-restore
+      - name: Build project
+        run: dotnet build Grocery.App/Grocery.App.csproj --configuration Release --no-restore --runtime win-x64
