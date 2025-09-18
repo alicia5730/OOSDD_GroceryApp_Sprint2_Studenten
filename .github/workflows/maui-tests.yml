@@ -8,7 +8,7 @@ on:
 
 jobs:
   build:
-    runs-on: windows-latest   # ✅ Windows runner, required for net8.0-windows
+    runs-on: windows-latest
 
     steps:
       - name: Checkout repository
@@ -22,14 +22,18 @@ jobs:
       - name: Install MAUI workload
         run: dotnet workload install maui
 
-      # 🔹 Restore ALL dependencies
-      - name: Restore solution
+      # Restore everything (no -f here!)
+      - name: Restore dependencies
         run: dotnet restore Grocery.sln
 
-      # 🔹 Build the MAUI Windows project
-      - name: Build Grocery.App (Windows only)
-        run: dotnet build Grocery.App/Grocery.App.csproj -c Release -f net8.0-windows10.0.19041.0 --no-restore -p:RuntimeIdentifier=win-x64 -p:PublishReadyToRun=false
+      # Build class libraries (cross-platform)
+      - name: Build libraries
+        run: dotnet build Grocery.sln -c Release --no-restore
 
-      # 🔹 Run tests (only Core projects should have tests, not the MAUI app)
+      # Build the MAUI Windows app explicitly
+      - name: Build Grocery.App (Windows)
+        run: dotnet build Grocery.App/Grocery.App.csproj -c Release -f net8.0-windows10.0.19041.0 -p:RuntimeIdentifier=win-x64 -p:PublishReadyToRun=false --no-restore
+
+      # Run tests (only on libs)
       - name: Run unit tests
         run: dotnet test Grocery.sln -c Release --no-build --verbosity normal
