@@ -1,34 +1,40 @@
-name: MAUI Checks (Windows TFM)
+name: MAUI (Windows TFM) Build
 
 on:
-  push: { branches: [ main ] }
-  pull_request: { branches: [ main ] }
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
 
 jobs:
-  build-windows:
+  build:
     runs-on: windows-latest
+
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@v4
 
-      - uses: actions/setup-dotnet@v4
+      # Installeert exact de SDK die in global.json staat (8.0.404 bij jou)
+      - name: Setup .NET (from global.json)
+        uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: 8.0.x
+          global-json-file: global.json
 
-      # optional but now fixed
-      - name: Create global.json
-        shell: pwsh
-        run: |
-          @"
-          {
-            "sdk": { "version": "8.0.404", "rollForward": "disable" }
-          }
-          "@ | Out-File -Encoding utf8 global.json
-
+      # Alleen Windows-TFM herstellen/bouwen
       - name: Restore (Windows TFM only)
         run: dotnet restore Grocery.App/Grocery.App.csproj -f net8.0-windows10.0.19041.0 -r win-x64
 
       - name: Build (Windows TFM only)
         run: dotnet build Grocery.App/Grocery.App.csproj -c Release -f net8.0-windows10.0.19041.0 -r win-x64 -p:PublishReadyToRun=false --no-restore
 
-      - name: Run tests (if present)
+      - name: Test (optioneel, als je tests hebt)
         run: dotnet test -c Release --no-build
+
+      - name: Publish artifact (optioneel)
+        run: dotnet publish Grocery.App/Grocery.App.csproj -c Release -f net8.0-windows10.0.19041.0 -r win-x64 -p:WindowsPackageType=None -o out/win
+      - name: Upload artifact
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: GroceryApp-win
+          path: out/win/**
