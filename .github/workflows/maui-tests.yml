@@ -1,10 +1,8 @@
 name: MAUI Checks (Windows TFM)
 
 on:
-  push:
-    branches: [ main ]
-  pull_request:
-    branches: [ main ]
+  push: { branches: [ main ] }
+  pull_request: { branches: [ main ] }
 
 jobs:
   build-windows:
@@ -16,9 +14,15 @@ jobs:
         with:
           dotnet-version: 8.0.x
 
-      # optional: pin sdk to 8.0
+      # optional but now fixed
       - name: Create global.json
-        run: echo {\"sdk\":{\"version\":\"8.0.404\",\"rollForward\":\"disable\"}} > global.json
+        shell: pwsh
+        run: |
+          @"
+          {
+            "sdk": { "version": "8.0.404", "rollForward": "disable" }
+          }
+          "@ | Out-File -Encoding utf8 global.json
 
       - name: Restore (Windows TFM only)
         run: dotnet restore Grocery.App/Grocery.App.csproj -f net8.0-windows10.0.19041.0 -r win-x64
@@ -26,5 +30,5 @@ jobs:
       - name: Build (Windows TFM only)
         run: dotnet build Grocery.App/Grocery.App.csproj -c Release -f net8.0-windows10.0.19041.0 -r win-x64 -p:PublishReadyToRun=false --no-restore
 
-      - name: Run tests (if you have a test project)
+      - name: Run tests (if present)
         run: dotnet test -c Release --no-build
