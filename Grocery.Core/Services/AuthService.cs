@@ -21,7 +21,6 @@ namespace Grocery.Core.Services
 
                 if (PasswordHelper.VerifyPassword(password, client._password))
                     return client;
-
             return null;
         }
     }
