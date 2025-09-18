@@ -8,7 +8,7 @@ on:
 
 jobs:
   build:
-    runs-on: windows-latest   # ✅ gebruik Windows agent, want je wilt net8.0-windows bouwen
+    runs-on: windows-latest   # ✅ Windows runner, required for net8.0-windows
 
     steps:
       - name: Checkout repository
@@ -19,19 +19,17 @@ jobs:
         with:
           dotnet-version: 8.0.414
 
-      # Alleen nodig voor MAUI workloads
       - name: Install MAUI workload
         run: dotnet workload install maui
 
-      - name: Restore dependencies
+      # 🔹 Restore ALL dependencies
+      - name: Restore solution
         run: dotnet restore Grocery.sln
-        
-      - name: Restore dependencies
-        run: dotnet restore Grocery.App/Grocery.App.csproj -f net8.0-windows10.0.19041.0
 
+      # 🔹 Build the MAUI Windows project
       - name: Build Grocery.App (Windows only)
         run: dotnet build Grocery.App/Grocery.App.csproj -c Release -f net8.0-windows10.0.19041.0 --no-restore
 
-
+      # 🔹 Run tests (only Core projects should have tests, not the MAUI app)
       - name: Run unit tests
         run: dotnet test Grocery.sln -c Release --no-build --verbosity normal
