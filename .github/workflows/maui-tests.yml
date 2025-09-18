@@ -1,4 +1,4 @@
-name: MAUI (Windows TFM) Build
+name: MAUI CI
 
 on:
   push:
@@ -8,24 +8,26 @@ on:
 
 jobs:
   build:
-    runs-on: windows-latest
+    runs-on: windows-latest   # ✅ gebruik Windows agent, want je wilt net8.0-windows bouwen
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
-      - name: Ensure global.json (SDK 8.0.414)
-        shell: pwsh
-        run: |
-          $json = @{ sdk = @{ version = "8.0.414"; rollForward = "disable" } } | ConvertTo-Json -Compress
-          Set-Content -Path global.json -Value $json -Encoding UTF8
-
-      - name: Setup .NET (from global.json)
+      - name: Setup .NET 8.0.414
         uses: actions/setup-dotnet@v4
         with:
-          global-json-file: global.json
+          dotnet-version: 8.0.414
 
-      - name: Restore (Windows TFM only)
-        run: dotnet restore Grocery.App/Grocery.App.csproj -f net8.0-windows10.0.19041.0 -r win-x64
+      # Alleen nodig voor MAUI workloads
+      - name: Install MAUI workload
+        run: dotnet workload install maui
 
-      - name: Build (Windows TFM only)
-        run: dotnet build Grocery.App/Grocery.App.csproj -c Release -f net8.0-windows10.0.19041.0 -r win-x64 -p:PublishReadyToRun=false --no-restore
+      - name: Restore dependencies
+        run: dotnet restore Grocery.sln
+
+      - name: Build Grocery.App (Windows target)
+        run: dotnet build Grocery.App/Grocery.App.csproj -c Release -f net8.0-windows10.0.19041.0 --no-restore
+
+      - name: Run unit tests
+        run: dotnet test Grocery.sln -c Release --no-build --verbosity normal
