@@ -26,11 +26,12 @@ jobs:
       - name: Restore dependencies
         run: dotnet restore Grocery.sln
 
-      - name: Restore dependencies (Windows RID)
-        run: dotnet restore Grocery.App/Grocery.App.csproj -f net8.0-windows10.0.19041.0 -r win10-x64
+      - name: Restore dependencies (Windows only)
+        run: dotnet restore Grocery.App/Grocery.App.csproj -f net8.0-windows10.0.19041.0 -r win-x64
 
-      - name: Build Grocery.App (Windows target)
-        run: dotnet build Grocery.App/Grocery.App.csproj -c Release -f net8.0-windows10.0.19041.0 -r win10-x64 --no-restore
+      - name: Build Grocery.App (Windows only)
+        run: dotnet build Grocery.App/Grocery.App.csproj -c Release -f net8.0-windows10.0.19041.0 -r win-x64 --no-restore
+
 
       - name: Run unit tests
         run: dotnet test Grocery.sln -c Release --no-build --verbosity normal
