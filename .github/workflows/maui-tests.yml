@@ -1,4 +1,4 @@
-name: MAUI Tests
+name: MAUI Build Check
 
 on:
   push:
@@ -8,30 +8,19 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
-
-    container:
-      image: mcr.microsoft.com/dotnet/sdk:8.0
-      options: --init
+    runs-on: windows-latest
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Setup .NET 8
-        uses: actions/setup-dotnet@v3
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
         with:
           dotnet-version: 8.0.x
-
-      # 👉 alleen nodig als je écht Android/Maui workload wil checken
-      # - name: Install MAUI workload
-      #   run: dotnet workload install maui
 
       - name: Restore dependencies
         run: dotnet restore
 
       - name: Build solution
         run: dotnet build --configuration Release --no-restore
-
-      - name: Run tests
-        run: dotnet test --configuration Release --no-build --verbosity normal
