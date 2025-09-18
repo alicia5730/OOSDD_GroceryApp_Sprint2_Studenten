@@ -22,25 +22,17 @@ jobs:
       - name: Install MAUI workload
         run: dotnet workload install maui --ignore-failed-sources
 
+      # ✅ Restore with RID so assets.json includes win10-x64
       - name: Restore dependencies
-        run: dotnet restore Grocery.sln
+        run: dotnet restore Grocery.App/Grocery.App.csproj -f net8.0-windows10.0.19041.0 -r win10-x64
 
+      # Optional build (publish already builds, but this keeps CI flow familiar)
       - name: Build MAUI app (Windows)
-        run: dotnet build Grocery.App/Grocery.App.csproj `
-             -c Release `
-             -f net8.0-windows10.0.19041.0 `
-             -p:RuntimeIdentifier=win10-x64 `
-             -p:PublishReadyToRun=false `
-             --no-restore
+        run: dotnet build Grocery.App/Grocery.App.csproj -c Release -f net8.0-windows10.0.19041.0 -r win10-x64 --no-restore -p:PublishReadyToRun=false
 
+      # ✅ Publish into artifacts
       - name: Package MAUI app
-        run: dotnet publish Grocery.App/Grocery.App.csproj `
-             -c Release `
-             -f net8.0-windows10.0.19041.0 `
-             -p:RuntimeIdentifier=win10-x64 `
-             -p:PublishSingleFile=false `
-             -p:WindowsPackageType=None `
-             -o ./artifacts/maui
+        run: dotnet publish Grocery.App/Grocery.App.csproj -c Release -f net8.0-windows10.0.19041.0 -r win10-x64 -o ./artifacts/maui -p:WindowsPackageType=None -p:PublishSingleFile=false -p:PublishReadyToRun=false
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
