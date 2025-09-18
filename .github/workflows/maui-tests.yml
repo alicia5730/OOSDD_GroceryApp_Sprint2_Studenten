@@ -28,7 +28,7 @@ jobs:
 
       # 🔹 Build the MAUI Windows project
       - name: Build Grocery.App (Windows only)
-        run: dotnet build Grocery.App/Grocery.App.csproj -c Release -f net8.0-windows10.0.19041.0 --no-restore
+        run: dotnet build Grocery.App/Grocery.App.csproj -c Release -f net8.0-windows10.0.19041.0 --no-restore -p:RuntimeIdentifier=win-x64 -p:PublishReadyToRun=false
 
       # 🔹 Run tests (only Core projects should have tests, not the MAUI app)
       - name: Run unit tests
