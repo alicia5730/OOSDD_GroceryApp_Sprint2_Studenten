@@ -11,30 +11,21 @@ jobs:
     runs-on: windows-latest
 
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      # Installeert exact de SDK die in global.json staat (8.0.404 bij jou)
+      - name: Ensure global.json (SDK 8.0.414)
+        shell: pwsh
+        run: |
+          $json = @{ sdk = @{ version = "8.0.414"; rollForward = "disable" } } | ConvertTo-Json -Compress
+          Set-Content -Path global.json -Value $json -Encoding UTF8
+
       - name: Setup .NET (from global.json)
         uses: actions/setup-dotnet@v4
         with:
           global-json-file: global.json
 
-      # Alleen Windows-TFM herstellen/bouwen
       - name: Restore (Windows TFM only)
         run: dotnet restore Grocery.App/Grocery.App.csproj -f net8.0-windows10.0.19041.0 -r win-x64
 
       - name: Build (Windows TFM only)
         run: dotnet build Grocery.App/Grocery.App.csproj -c Release -f net8.0-windows10.0.19041.0 -r win-x64 -p:PublishReadyToRun=false --no-restore
-
-      - name: Test (optioneel, als je tests hebt)
-        run: dotnet test -c Release --no-build
-
-      - name: Publish artifact (optioneel)
-        run: dotnet publish Grocery.App/Grocery.App.csproj -c Release -f net8.0-windows10.0.19041.0 -r win-x64 -p:WindowsPackageType=None -o out/win
-      - name: Upload artifact
-        if: success()
-        uses: actions/upload-artifact@v4
-        with:
-          name: GroceryApp-win
-          path: out/win/**
