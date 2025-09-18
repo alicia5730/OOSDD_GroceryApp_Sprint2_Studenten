@@ -44,8 +44,6 @@ namespace Grocery.App.ViewModels
             foreach (var product in products)
             {
                 bool alreadyInList = (from item in MyGroceryListItems where item.ProductId == product.Id select item).Any();
-
-
                 //Houdt rekening met de voorraad (als die nul is kun je het niet meer aanbieden).     
                 if (!alreadyInList && product.Stock > 0)
                 {
@@ -69,11 +67,35 @@ namespace Grocery.App.ViewModels
         public void AddProduct(Product product)
         {
             //Controleer of het product bestaat en dat de Id > 0
+            if (product == null || product.Id <= 0)
+                throw new ArgumentException("Product bestaat niet of heeft een ongeldige Id");
+
             //Maak een GroceryListItem met Id 0 en vul de juiste productid en grocerylistid
-            //Voeg het GroceryListItem toe aan de dataset middels de _groceryListItemsService
-            //Werk de voorraad (Stock) van het product bij en zorg dat deze wordt vastgelegd (middels _productService)
-            //Werk de lijst AvailableProducts bij, want dit product is niet meer beschikbaar
-            //call OnGroceryListChanged(GroceryList);
+            var newItem = new GroceryListItem(
+                id: 0,
+                groceryListId: GroceryList.Id,
+                productId: product.Id,
+                amount: 1 // default, of meegeven als parameter
+            );
+
+            //Voeg het GroceryListItem toe aan de dataset
+            _groceryListItemsService.Add(newItem);
+
+            //Werk de voorraad (Stock) van het product bij en leg vast via _productService
+            if (product.Stock <= 0)
+                throw new InvalidOperationException("Product niet op voorraad");
+
+            product.Stock -= 1;
+            _productService.Update(product);
+
+            //Werk de lijst AvailableProducts bij
+            AvailableProducts = new ObservableCollection<Product>(
+                _productService.GetAll()
+                    .Where(p => p.Stock > 0)
+            );
+
+            //Call OnGroceryListChanged(GroceryList)
+            OnGroceryListChanged(GroceryList);
         }
     }
 }
