@@ -24,7 +24,7 @@ jobs:
 
       # ✅ Restore with RID so assets.json includes win10-x64
       - name: Restore dependencies
-        run: dotnet restore Grocery.App/Grocery.App.csproj -r win10-x64 -f net8.0-windows10.0.19041.0
+        run: dotnet restore Grocery.App/Grocery.App.csproj -p:TargetFramework=net8.0-windows10.0.19041.0 -p:RuntimeIdentifier=win10-x64
       # Optional build (publish already builds, but this keeps CI flow familiar)
       - name: Build MAUI app (Windows)
         run: dotnet build Grocery.App/Grocery.App.csproj -c Release -f net8.0-windows10.0.19041.0 -r win10-x64 --no-restore -p:PublishReadyToRun=false
