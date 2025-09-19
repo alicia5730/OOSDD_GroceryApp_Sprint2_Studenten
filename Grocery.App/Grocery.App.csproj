@@ -40,6 +40,9 @@
 		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'tizen'">6.5</SupportedOSPlatformVersion>
 		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
 	</PropertyGroup>
+	<PropertyGroup Condition="'$(TargetFramework)' == 'net8.0-windows10.0.19041.0'">
+  		<WindowsPackageType>None</WindowsPackageType>
+	</PropertyGroup>
 	<ItemGroup>
 	<None Remove="**\*.pdb" />
 	</ItemGroup>
