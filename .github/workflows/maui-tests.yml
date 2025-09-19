@@ -24,13 +24,11 @@ jobs:
 
       # ✅ Alleen Windows target restoren
       - name: Restore dependencies (Windows)
-        run: dotnet restore Grocery.App/Grocery.App.csproj -f net8.0-windows10.0.19041.0 -r win-x64
-
+        run: dotnet restore Grocery.App/Grocery.App.csproj -r win-x64
       # ✅ Alleen Windows target builden
       - name: Build MAUI app (Windows)
         run: dotnet build Grocery.App/Grocery.App.csproj -c Release -f net8.0-windows10.0.19041.0 -r win-x64 --no-restore
 
-      # ✅ Publiceer naar artifacts (geen MSIX, gewoon losse exe/dll)
       - name: Publish MAUI app (Windows)
         run: dotnet publish Grocery.App/Grocery.App.csproj -c Release -f net8.0-windows10.0.19041.0 -r win-x64 -o ./artifacts/maui -p:WindowsPackageType=None -p:PublishSingleFile=false -p:PublishReadyToRun=false
 
