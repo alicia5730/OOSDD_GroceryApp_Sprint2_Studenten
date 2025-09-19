@@ -1,4 +1,4 @@
-name: MAUI CI
+name: MAUI CI (Windows only)
 
 on:
   push:
@@ -7,14 +7,14 @@ on:
     branches: [ "main" ]
 
 jobs:
-  build:
+  build-windows:
     runs-on: windows-latest
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Setup .NET 8.0.414
+      - name: Setup .NET 8
         uses: actions/setup-dotnet@v4
         with:
           dotnet-version: 8.0.414
@@ -22,18 +22,20 @@ jobs:
       - name: Install MAUI workload
         run: dotnet workload install maui --ignore-failed-sources
 
-      # ✅ Restore with RID so assets.json includes win10-x64
-      - name: Restore dependencies
-        run: dotnet restore Grocery.App/Grocery.App.csproj -r win10-x64
-      - name: Build MAUI app (Windows)
-        run: dotnet build Grocery.App/Grocery.App.csproj -c Release -f net8.0-windows10.0.19041.0 -r win10-x64 --no-restore
+      # ✅ Alleen Windows target restoren
+      - name: Restore dependencies (Windows)
+        run: dotnet restore Grocery.App/Grocery.App.csproj -f net8.0-windows10.0.19041.0 -r win-x64
 
-      # ✅ Publish into artifacts
-      - name: Package MAUI app
-        run: dotnet publish Grocery.App/Grocery.App.csproj -c Release -f net8.0-windows10.0.19041.0 -r win10-x64 -o ./artifacts/maui -p:WindowsPackageType=None -p:PublishSingleFile=false -p:PublishReadyToRun=false
+      # ✅ Alleen Windows target builden
+      - name: Build MAUI app (Windows)
+        run: dotnet build Grocery.App/Grocery.App.csproj -c Release -f net8.0-windows10.0.19041.0 -r win-x64 --no-restore
+
+      # ✅ Publiceer naar artifacts (geen MSIX, gewoon losse exe/dll)
+      - name: Publish MAUI app (Windows)
+        run: dotnet publish Grocery.App/Grocery.App.csproj -c Release -f net8.0-windows10.0.19041.0 -r win-x64 -o ./artifacts/maui -p:WindowsPackageType=None -p:PublishSingleFile=false -p:PublishReadyToRun=false
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
-          name: GroceryApp
+          name: GroceryApp-win-x64
           path: artifacts/maui
